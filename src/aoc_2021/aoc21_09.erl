@@ -24,22 +24,22 @@ filter_low_point(X, Y, C) ->
         ?else -> []
     end.
 
-expand_basin(P) -> expand_basin(P, []).
-expand_basin({X, Y, C}, Basin) ->
-    IsAlreadyInBasin = lists:member({X, Y}, Basin),
-    if
-        IsAlreadyInBasin ->
-            Basin;
-        ?else ->
-            Neighbours = canvas2d:neighbours_adjacent(X, Y, C),
-            BasinBuddies = [{NX, NY, C} || {NX, NY, NV} <- Neighbours, NV < 9],
-            NewBasin = lists:foldl(
-                fun expand_basin/2,
-                [{X, Y} | Basin],
-                BasinBuddies
-            ),
-            NewBasin
-    end.
+expand_basin(X, Y, Canvas) ->
+    fun Recurse({X, Y}, Basin) ->
+        IsAlreadyInBasin = lists:member({X, Y}, Basin),
+        if
+            IsAlreadyInBasin ->
+                Basin;
+            ?else ->
+                BasinBuddies = [{NX, NY} || {NX, NY, NV} <- canvas2d:neighbours_adjacent(X, Y, Canvas), NV < 9],
+                NewBasin = lists:foldl(
+                    Recurse,
+                    [{X, Y} | Basin],
+                    BasinBuddies
+                ),
+                NewBasin
+        end
+    end ({X, Y}, []).
 
 answer() ->
     Dat = aoc21:data("09", fun process_dat/1),
@@ -49,7 +49,7 @@ answer() ->
 
     RiskLevel = lists:sum([V + 1 || {_X, _Y, V} <- LowPoints]),
 
-    Basins = [expand_basin({X, Y, Map}) || {X, Y, _} <- LowPoints],
+    Basins = [expand_basin(X, Y, Map) || {X, Y, _} <- LowPoints],
     BasinsSize = [length(B) || B <- Basins],
     {TopThree, _} = lists:split(3, lists:reverse(lists:sort(BasinsSize))),
     TopThreeProduct = lists:foldl(fun(A, B) -> A * B end, 1, TopThree),
