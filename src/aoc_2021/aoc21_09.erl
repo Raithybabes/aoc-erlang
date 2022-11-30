@@ -1,0 +1,57 @@
+-module(aoc21_09).
+
+-export([answer/0]).
+
+-define(else, true).
+
+test_data() ->
+    [
+        "2199943210",
+        "3987894921",
+        "9856789892",
+        "8767896789",
+        "9899965678"
+    ].
+
+process_dat(V) -> [list_to_integer(X) || X <- dat:match_global(V, "\\d")].
+
+filter_low_point(X, Y, C) ->
+    V = canvas2d:get(X, Y, C),
+    Neighbours = [NV || {_, _, NV} <- canvas2d:neighbours_adjacent(X, Y, C)],
+    IsLowPoint = lists:all(fun(NV) -> V < NV end, Neighbours),
+    if
+        IsLowPoint -> {X, Y, V};
+        ?else -> []
+    end.
+
+expand_basin(P) -> expand_basin(P, []).
+expand_basin({X, Y, C}, Basin) ->
+    IsAlreadyInBasin = lists:member({X, Y}, Basin),
+    if
+        IsAlreadyInBasin ->
+            Basin;
+        ?else ->
+            Neighbours = canvas2d:neighbours_adjacent(X, Y, C),
+            BasinBuddies = [{NX, NY, C} || {NX, NY, NV} <- Neighbours, NV < 9],
+            NewBasin = lists:foldl(
+                fun expand_basin/2,
+                [{X, Y} | Basin],
+                BasinBuddies
+            ),
+            NewBasin
+    end.
+
+answer() ->
+    Dat = aoc21:data("09", fun process_dat/1),
+    % Dat = [process_dat(V) || V <- test_data()],
+    Map = canvas2d:from_list2d(Dat),
+    LowPoints = lists:flatten(canvas2d:process(fun filter_low_point/3, Map)),
+
+    RiskLevel = lists:sum([V + 1 || {_X, _Y, V} <- LowPoints]),
+
+    Basins = [expand_basin({X, Y, Map}) || {X, Y, _} <- LowPoints],
+    BasinsSize = [length(B) || B <- Basins],
+    {TopThree, _} = lists:split(3, lists:reverse(lists:sort(BasinsSize))),
+    TopThreeProduct = lists:foldl(fun(A, B) -> A * B end, 1, TopThree),
+
+    {RiskLevel, TopThreeProduct}.
