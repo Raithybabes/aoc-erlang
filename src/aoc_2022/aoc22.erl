@@ -9,7 +9,7 @@ data(Num, Processor) -> dat:map_data("../src/dat_2022/dat_" ++ Num, Processor).
 
 expected() ->
     [
-        {aoc22_01, {-1, -1}}
+        {aoc22_01, {68787, 198041}}
         % ,{aoc22_02, {-1, -1}}
         % ,{aoc22_03, {-1, -1}}
         % ,{aoc22_04, {-1, -1}}
