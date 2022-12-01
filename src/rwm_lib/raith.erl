@@ -1,8 +1,10 @@
 -module(raith).
 
+% Note: do not use these funs! These are experiments and a reminder of how to do things.
+
 -export([
     version/0,
-    list_union/2,
+    list_intersect/2,
     factorial/1,
     list_reverse/1,
     sort/1,
@@ -16,7 +18,7 @@
 
 version() -> ?v(major) ++ "." ++ ?v(minor) ++ "." ++ ?v(patch).
 
-list_union(List1, List2) -> [V1 || V1 <- List1, V2 <- List2, V1 == V2].
+list_intersect(List1, List2) -> lists:uniq([V1 || V1 <- List1, V2 <- List2, V1 =:= V2]).
 
 factorial(0) -> 1;
 factorial(N) when N > 0 -> N * factorial(N - 1).
