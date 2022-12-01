@@ -13,8 +13,8 @@ process_dat(B) -> binary_to_integer(B).
 
 answer() ->
     Dat = aoc22:data("01", fun process_dat/1),
-    ElfCalories = lists:reverse(lists:sort(subtotals(Dat))),
+    ElfCalories = lists:sort(subtotals(Dat)),
     io:format("~p Elves~n", [length(ElfCalories)]),
-    MaxCalories = lists:nth(1, ElfCalories),
-    {TopThreeCalories, _} = lists:split(3, ElfCalories),
+    TopThreeCalories = rwm:last(3, ElfCalories),
+    MaxCalories = rwm:last(TopThreeCalories),
     {MaxCalories, lists:sum(TopThreeCalories)}.
