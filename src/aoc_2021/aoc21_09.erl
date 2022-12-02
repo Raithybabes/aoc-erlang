@@ -15,8 +15,7 @@ test_data() ->
 
 process_dat(V) -> [list_to_integer(X) || X <- dat:match_global(V, "\\d")].
 
-filter_low_point(X, Y, C) ->
-    V = canvas2d:get(X, Y, C),
+filter_low_point(X, Y, V, C) ->
     Neighbours = [NV || {_, _, NV} <- canvas2d:neighbours_adjacent(X, Y, C)],
     IsLowPoint = lists:all(fun(NV) -> V < NV end, Neighbours),
     if
@@ -45,7 +44,7 @@ answer() ->
     Dat = aoc21:data("09", fun process_dat/1),
     % Dat = [process_dat(V) || V <- test_data()],
     Map = canvas2d:from_list2d(Dat),
-    LowPoints = lists:flatten(canvas2d:process(fun filter_low_point/3, Map)),
+    LowPoints = lists:flatten(canvas2d:process(fun filter_low_point/4, Map)),
 
     RiskLevel = lists:sum([V + 1 || {_X, _Y, V} <- LowPoints]),
 

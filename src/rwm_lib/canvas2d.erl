@@ -25,7 +25,7 @@ index(X, Y, Width) -> Y * Width + X.
 to_list({_, _, A} = _Canvas) -> array:to_list(A).
 
 process(F, {W, H, _} = Canvas) ->
-    [F(X, Y, Canvas) || X <- lists:seq(0, W - 1), Y <- lists:seq(0, H - 1)].
+    [F(X, Y, get(X, Y, Canvas), Canvas) || X <- lists:seq(0, W - 1), Y <- lists:seq(0, H - 1)].
 
 check_bounds(X, Y, {W, H, _}) when (X >= 0) and (X < W) and (Y >= 0) and (Y < H) -> {X, Y};
 check_bounds(_, _, _) -> [].
