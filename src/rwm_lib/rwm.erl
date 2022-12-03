@@ -1,12 +1,13 @@
 -module(rwm).
 
--export([iif/3]).
+-export([iif/1, iif/3]).
 -export([string_to_atoms/1, strings_to_atoms/1]).
 -export([sort_lists_by_length/1, first/1, first/2, last/1, last/2]).
 -export([frequencies/1]).
 -export([pipe/2]).
 -export([pipeline/2]).
 
+iif(Value) -> iif(Value, true, false).
 iif(Value, True, False) ->
     if
         Value -> True;
