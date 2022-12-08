@@ -7,6 +7,7 @@
     to_integer/1,
     to_bits/1,
     to_integer_list/1,
+    to_digit_list/1,
     to_float_list/1,
     to_token_list/1,
     match/2,
@@ -31,6 +32,12 @@ to_integer_list(<<>>) ->
     [];
 to_integer_list(B) ->
     {match, Captures} = re:run(B, "\\d+", [global, {capture, all, list}]),
+    lists:map(fun(X) -> list_to_integer(lists:flatten(X)) end, Captures).
+
+to_digit_list(<<>>) ->
+    [];
+to_digit_list(B) ->
+    {match, Captures} = re:run(B, "\\d", [global, {capture, all, list}]),
     lists:map(fun(X) -> list_to_integer(lists:flatten(X)) end, Captures).
 
 to_float_list(B) ->
