@@ -1,13 +1,13 @@
 -module(grid).
 
 -export([new/2, new/3, from_list2d/1, get/3, set/4]).
--export([all/1, scan/2, process/2, process/3, process_ext/3, process_ext/4]).
+-export([all/1, scan/2, filter/2, process/2, process/3, process_ext/3, process_ext/4]).
 -export([process_ext_times/4, process_ext_times/5, process_ext_until/4, process_ext_until/5]).
 -export([adjacent_positions/3, adjacent_neighbours/3]).
 -export([adjacent_and_diagonal_positions/3, adjacent_and_diagonal_neighbours/3]).
 -export([diamond_positions/3, diamond_neighbours/3]).
 -export([positions_to_edge/5, positions_to_edges/3, neighbours_to_edges/3]).
--export([to_list2d/1]).
+-export([to_list2d/1, to_graph/2]).
 
 -define(else, true).
 -define(neighbours_4, {0, -1}, {-1, 0}, {1, 0}, {0, 1}).
@@ -48,6 +48,10 @@ all({W, H, _G}) ->
 
 scan(F, Grid) ->
     [F({X, Y, get(X, Y, Grid), Grid}) || {X, Y} <- all(Grid)].
+
+filter(F, Grid) ->
+    Keep = [{Pos, F({X, Y, get(X, Y, Grid), Grid})} || {X, Y} = Pos <- all(Grid)],
+    [Pos || {Pos, true} <- Keep].
 
 process(F, Grid) ->
     process(F, Grid, all(Grid)).
@@ -132,3 +136,17 @@ to_list2d({_W, _H, G}) ->
     List = array:to_list(G),
     Rows = [array:to_list(Row) || Row <- List],
     Rows.
+
+to_graph(FConfirmEdge, Grid) ->
+    Graph = digraph:new(),
+    GridAll = grid:all(Grid),
+    [digraph:add_vertex(Graph, Node) || Node <- GridAll],
+    to_graph_add_edge(FConfirmEdge, GridAll, Grid, Graph),
+    Graph.
+
+to_graph_add_edge(_F, [], _Grid, _Graph) ->
+    {ok};
+to_graph_add_edge(F, [{X, Y} = From | T], Grid, Graph) ->
+    Edges = [{To, F(From, To, Grid)} || To <- grid:adjacent_positions(X, Y, Grid)],
+    [digraph:add_edge(Graph, From, Edge) || {Edge, true} <- Edges],
+    to_graph_add_edge(F, T, Grid, Graph).
