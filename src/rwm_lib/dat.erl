@@ -7,6 +7,7 @@
     to_integer/1,
     to_bits/1,
     to_integer_list/1,
+    to_positive_integer_list/1,
     to_digit_list/1,
     to_float_list/1,
     to_token_list/1,
@@ -28,10 +29,16 @@ to_token_list(B) ->
     {match, Captures} = re:run(B, "\\w+", [global, {capture, all, list}]),
     [lists:flatten(X) || X <- Captures].
 
+to_positive_integer_list(<<>>) ->
+    [];
+to_positive_integer_list(B) ->
+    {match, Captures} = re:run(B, "\\d+", [global, {capture, all, list}]),
+    lists:map(fun(X) -> list_to_integer(lists:flatten(X)) end, Captures).
+
 to_integer_list(<<>>) ->
     [];
 to_integer_list(B) ->
-    {match, Captures} = re:run(B, "\\d+", [global, {capture, all, list}]),
+    {match, Captures} = re:run(B, "-?\\d+", [global, {capture, all, list}]),
     lists:map(fun(X) -> list_to_integer(lists:flatten(X)) end, Captures).
 
 to_digit_list(<<>>) ->
@@ -41,7 +48,7 @@ to_digit_list(B) ->
     lists:map(fun(X) -> list_to_integer(lists:flatten(X)) end, Captures).
 
 to_float_list(B) ->
-    {match, Captures} = re:run(B, "[\\d.]+", [global, {capture, all, list}]),
+    {match, Captures} = re:run(B, "-?[\\d.]+", [global, {capture, all, list}]),
     lists:map(fun(X) -> list_to_float(lists:flatten(X)) end, Captures).
 
 duplicate(Number, Item) -> duplicate(Number, Item, []).

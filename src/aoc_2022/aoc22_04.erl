@@ -3,7 +3,7 @@
 -export([answer/0]).
 
 process_dat(Line) ->
-    [Start1, End1, Start2, End2] = dat:to_integer_list(Line),
+    [Start1, End1, Start2, End2] = dat:to_positive_integer_list(Line),
     {{Start1, End1}, {Start2, End2}}.
 
 overlaps({{A1, A2}, {B1, B2}}) -> (A1 =< B2) and (A2 >= B1).
