@@ -1,4 +1,131 @@
-10,18,8
+
+
+
+function process_dat(use_test_data = false) {
+    const dat = use_test_data ? test_dat() : raw_dat()
+    return dat.map(process_dat_line)
+}
+
+function process_dat_line(l) {
+    [x, y, z] = l.match(/\d+/g)
+    return { x: parseInt(x), y: parseInt(y), z: parseInt(z) }
+}
+
+const dat = process_dat(false)
+
+function find_min_max(vals) {
+    return vals.reduce((acc, v) => ({ min: acc.min === undefined ? v : Math.min(acc.min, v), max: acc.max === undefined ? v + 2: Math.max(acc.max, v + 2) }), {})
+}
+
+xrange = find_min_max(dat.map(a => a.x))
+yrange = find_min_max(dat.map(a => a.y))
+zrange = find_min_max(dat.map(a => a.z))
+
+dat3d = make_3d_space(xrange.max, yrange.max, zrange.max)
+
+function make_3d_space(x_max, y_max, z_max) {
+    return Array(x_max + 1).join('.').split('.').map(x => {
+        return Array(y_max + 1).join('.').split('.').map(y => {
+            return Array(z_max + 1).join('.').split('.').map(z => {
+                return ' '
+            })
+        })
+    })
+}
+
+dat.forEach(d => dat3d[1 + d.x][1 + d.y][1 + d.z] = '#')
+
+function draw(xyz) {
+    for (let x = 0; x <= xrange.max; x++) {
+        console.log(`X slice ${x}`)
+        for (let y = 0; y <= yrange.max; y++) {
+            let tmp = ''
+            for (let z = 0; z <= zrange.max; z++) {
+                tmp += xyz[x][y][z]
+            }
+            console.log(`Y:${y} ... ${tmp}`)
+        }
+        console.log(`\n`)
+    }
+}
+
+let total = 0
+
+for (let x = 1; x < xrange.max; x++) {
+    for (let y = 1; y < yrange.max; y++) {
+        for (let z = 1; z < zrange.max; z++) {
+            if (dat3d[x][y][z] != ' ') {
+                total += dat3d[x-1][y][z] == ' ' ? 1 : 0
+                total += dat3d[x+1][y][z] == ' ' ? 1 : 0
+                total += dat3d[x][y-1][z] == ' ' ? 1 : 0
+                total += dat3d[x][y+1][z] == ' ' ? 1 : 0
+                total += dat3d[x][y][z-1] == ' ' ? 1 : 0
+                total += dat3d[x][y][z+1] == ' ' ? 1 : 0
+            }
+        }
+    }
+}
+
+// draw(dat3d)
+
+console.log(`Part1 = ${total}`) // 4320
+
+fill(dat3d, [[0, 0, 0]])
+
+function fill(space, q) {
+    while (q.length > 0) {
+        [x, y, z] = q.shift()
+        if (space[x][y][z] != ' ') continue
+        // console.log(`filling ${x},${y},${z}`)
+        space[x][y][z] = '.'
+        if (x > 0 && space[x - 1][y][z] == ' ') q.push([x - 1, y, z])
+        if (x < xrange.max && space[x + 1][y][z] == ' ') q.push([x + 1, y, z])
+        if (y > 0 && space[x][y - 1][z] == ' ') q.push([x, y - 1, z])
+        if (y < yrange.max && space[x][y + 1][z] == ' ') q.push([x, y + 1, z])
+        if (z > 0 && space[x][y][z - 1] == ' ') q.push([x, y, z - 1])
+        if (z < zrange.max && space[x][y][z + 1] == ' ') q.push([x, y, z + 1])
+    }
+}
+
+// draw(dat3d)
+
+total = 0
+
+for (let x = 1; x < xrange.max; x++) {
+    for (let y = 1; y < yrange.max; y++) {
+        for (let z = 1; z < zrange.max; z++) {
+            if (dat3d[x][y][z] != '.') {
+                total += dat3d[x - 1][y][z] == '.' ? 1 : 0
+                total += dat3d[x + 1][y][z] == '.' ? 1 : 0
+                total += dat3d[x][y - 1][z] == '.' ? 1 : 0
+                total += dat3d[x][y + 1][z] == '.' ? 1 : 0
+                total += dat3d[x][y][z - 1] == '.' ? 1 : 0
+                total += dat3d[x][y][z + 1] == '.' ? 1 : 0
+            }
+        }
+    }
+}
+
+console.log(`Part2 = ${total}`) // 2456
+
+function test_dat() {
+    return `2,2,2
+1,2,2
+3,2,2
+2,1,2
+2,3,2
+2,2,1
+2,2,3
+2,2,4
+2,2,6
+1,2,5
+3,2,5
+2,1,5
+2,3,5`.split('\n')
+}
+
+function raw_dat() {
+    return `10,18,8
 9,1,11
 5,12,4
 19,8,11
@@ -2827,4 +2954,5 @@
 11,17,13
 16,6,9
 3,14,15
-16,10,17
+16,10,17`.split('\n')
+}
