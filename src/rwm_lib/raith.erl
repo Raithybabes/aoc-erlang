@@ -35,11 +35,10 @@ sort([H | T]) -> sort([X || X <- T, X =< H]) ++ [H] ++ sort([X || X <- T, X > H]
 % A partitioner using tail recursion, ultimately delivers the lists of Lesser and Greater items
 partition(_, [], Lesser, Greater) ->
     {Lesser, Greater};
-partition(SplitValue, [H | T], Lesser, Greater) ->
-    if
-        H =< SplitValue -> partition(SplitValue, T, [H | Lesser], Greater);
-        H > SplitValue -> partition(SplitValue, T, Lesser, [H | Greater])
-    end.
+partition(SplitValue, [H | T], Lesser, Greater) when H =< SplitValue ->
+    partition(SplitValue, T, [H | Lesser], Greater);
+partition(SplitValue, [H | T], Lesser, Greater) when H > SplitValue ->
+    partition(SplitValue, T, Lesser, [H | Greater]).
 partition(SplitValue, List) -> partition(SplitValue, List, [], []).
 
 % Slightly less naive quicksort - uses partitioner to split the list in a single pass of tail-recursion

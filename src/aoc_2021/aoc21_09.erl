@@ -1,5 +1,7 @@
 -module(aoc21_09).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 -define(else, true).
@@ -18,27 +20,29 @@ process_dat(V) -> [list_to_integer(X) || X <- dat:match_global(V, "\\d")].
 filter_low_point(X, Y, V, C) ->
     Neighbours = [NV || {_, _, NV} <- canvas2d:neighbours_adjacent(X, Y, C)],
     IsLowPoint = lists:all(fun(NV) -> V < NV end, Neighbours),
-    if
-        IsLowPoint -> {X, Y, V};
-        ?else -> []
-    end.
+    ?CASE(IsLowPoint, {X, Y, V}, []).
 
-expand_basin(X, Y, Canvas) ->
-    fun Recurse({X, Y}, Basin) ->
+expand_basin(StartX, StartY, Canvas) ->
+    fun Recurse_expand({X, Y}, Basin) ->
         IsAlreadyInBasin = lists:member({X, Y}, Basin),
-        if
-            IsAlreadyInBasin ->
+        case IsAlreadyInBasin of
+            true ->
                 Basin;
-            ?else ->
-                BasinBuddies = [{NX, NY} || {NX, NY, NV} <- canvas2d:neighbours_adjacent(X, Y, Canvas), NV < 9],
+            false ->
+                BasinBuddies = [
+                    {NX, NY}
+                 || {NX, NY, NV} <- canvas2d:neighbours_adjacent(X, Y, Canvas), NV < 9
+                ],
                 NewBasin = lists:foldl(
-                    Recurse,
+                    Recurse_expand,
                     [{X, Y} | Basin],
                     BasinBuddies
                 ),
                 NewBasin
         end
-    end ({X, Y}, []).
+    end(
+        {StartX, StartY}, []
+    ).
 
 answer() ->
     Dat = aoc21:data("09", fun process_dat/1),

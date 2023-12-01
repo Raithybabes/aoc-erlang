@@ -1,5 +1,7 @@
 -module(aoc22_12).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 height('S') ->
@@ -18,17 +20,11 @@ process_dat(Line) -> [list_to_atom(V) || V <- dat:match_global(Line, "\\w")].
 confirm_edge({X1, Y1}, {X2, Y2}, Grid) ->
     V1 = grid:get(X1, Y1, Grid),
     V2 = grid:get(X2, Y2, Grid),
-    if
-        V2 =< (V1 + 1) -> true;
-        true -> false
-    end.
+    V2 =< (V1 + 1).
 
 shortest_path(Graph, Start, End) ->
     ShortestPath = digraph:get_short_path(Graph, Start, End),
-    if
-        ShortestPath =:= false -> null;
-        true -> length(ShortestPath) - 1
-    end.
+    ?CASE(ShortestPath =:= false, null, length(ShortestPath) - 1).
 
 shortest_amongst_paths(Graph, Starts, End) -> shortest_amongst_paths(Graph, Starts, End, null).
 shortest_amongst_paths(_Graph, [], _End, Shortest) ->

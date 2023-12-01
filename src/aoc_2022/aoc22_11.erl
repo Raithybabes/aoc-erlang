@@ -1,5 +1,7 @@
 -module(aoc22_11).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 -record(monkey, {items = [], fn_op, div_test, true_target, false_target, inspect_count = 0}).
@@ -130,11 +132,7 @@ throw_all_the_things([Item | Rest], {Monkeys, Idx}, WorryDivisor) ->
     OpItem = floor(FnOp(Item) / WorryDivisor),
     NewItemValue = OpItem rem ?magic_divisor,
     IsDivisble = is_divisble(NewItemValue, Monkey#monkey.div_test),
-    Recipient =
-        if
-            IsDivisble -> Monkey#monkey.true_target;
-            true -> Monkey#monkey.false_target
-        end,
+    Recipient = ?CASE(IsDivisble, Monkey#monkey.true_target, Monkey#monkey.false_target),
     Monkeys1 = throw(Monkeys, Idx, Recipient, Item, NewItemValue),
     throw_all_the_things(Rest, {Monkeys1, Idx}, WorryDivisor).
 
@@ -145,10 +143,10 @@ step(Monkeys, _Idx, 0, _WorryDivisor) ->
     Monkeys;
 step(Monkeys, Idx, Num, WorryDivisor) ->
     DoneAllMonkeys = Idx >= array:size(Monkeys),
-    if
-        DoneAllMonkeys ->
-            step(Monkeys, 0, Num - 1, WorryDivisor);
+    case DoneAllMonkeys of
         true ->
+            step(Monkeys, 0, Num - 1, WorryDivisor);
+        false ->
             Monkeys1 = throw_all_the_things({Monkeys, Idx}, WorryDivisor),
             step(Monkeys1, Idx + 1, Num, WorryDivisor)
     end.

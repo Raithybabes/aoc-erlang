@@ -1,5 +1,7 @@
 -module(aoc22_08).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 check_if_visible({X, Y, V, G}) ->
@@ -8,15 +10,18 @@ check_if_visible({X, Y, V, G}) ->
     Visible = lists:any(fun(Visible) -> Visible =:= true end, VisibleByEdge),
     Visible.
 
+tree_heights(Trees) -> [V || {_X, _Y, V} <- Trees].
+
 count_visible_trees(HeightCutoff, Trees) ->
-    count_visible_trees(HeightCutoff, [V || {_X, _Y, V} <- Trees], 0).
-count_visible_trees(_, [], Count) ->
+    count_visible_trees(running, HeightCutoff, tree_heights(Trees), 0).
+count_visible_trees(_, _, [], Count) ->
     Count;
-count_visible_trees(HeightCutoff, [Tree | Rest], Count) ->
-    if
-        Tree >= HeightCutoff -> Count + 1;
-        true -> count_visible_trees(HeightCutoff, Rest, Count + 1)
-    end.
+count_visible_trees(finished, _, _, Count) ->
+    Count;
+count_visible_trees(running, HeightCutoff, [Tree | Rest], Count) ->
+    count_visible_trees(
+        ?CASE(Tree >= HeightCutoff, finished, running), HeightCutoff, Rest, Count + 1
+    ).
 
 product([H | T]) -> lists:foldl(fun(A, B) -> A * B end, H, T).
 

@@ -2,12 +2,9 @@
 
 -export([answer/0]).
 
-dir(From, To) ->
-    if
-        To > From -> 1;
-        From > To -> -1;
-        From == To -> 0
-    end.
+dir(From, To) when To > From -> 1;
+dir(From, To) when From > To -> -1;
+dir(_, _) -> 0.
 
 orthogonal_lines(Dat) ->
     lists:filter(fun([X1, Y1, X2, Y2]) -> (X1 == X2) or (Y1 == Y2) end, Dat).

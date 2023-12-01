@@ -1,5 +1,7 @@
 -module(aoc22_10).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 run_op({noop}, X) -> [X];
@@ -25,11 +27,7 @@ render([], _, Rendered) ->
     Rendered;
 render([Pixel | Rest], Count, Rendered) ->
     ScanPos = (Count - 1) rem 40,
-    SetPixel =
-        if
-            abs(ScanPos - Pixel) =< 1 -> 1;
-            true -> 0
-        end,
+    SetPixel = ?CASE(abs(ScanPos - Pixel) =< 1, 1, 0),
     render(Rest, Count + 1, Rendered ++ [SetPixel]).
 
 chunks(Inp, ChunkSize) -> chunks(Inp, ChunkSize, [], []).

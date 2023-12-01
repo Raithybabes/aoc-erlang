@@ -1,5 +1,7 @@
 -module(aoc22_17).
 
+-include("../rwm_lib/macros.hrl").
+
 -export([answer/0]).
 
 -define(air, ' ').
@@ -40,8 +42,7 @@ drop_direction() -> {0, -1}.
 well_new() ->
     array:from_list([array:new({default, ?air}) || _I <- lists:seq(1, ?width)], {default, ?oob}).
 
-well_get(X, Y, Well) when X < 0 -> ?oob;
-well_get(X, Y, Well) when X > ?max_x -> ?oob;
+well_get(X, _Y, _Well) when (X < 0) or (X > ?max_x) -> ?oob;
 well_get(X, Y, Well) -> array:get(Y, array:get(X, Well)).
 
 well_height(Well) ->
@@ -67,20 +68,13 @@ set_shape(Well, ShapeIdx, {X, Y}) ->
 
 effective_offset(Well, ShapeIdx, {X, Y}, TestOffset) ->
     IsClear = check_shape_direction(Well, ShapeIdx, {X, Y}, TestOffset),
-    if
-        IsClear -> TestOffset;
-        true -> {0, 0}
-    end.
+    ?CASE(IsClear, TestOffset, {0, 0}).
 
 inc_shape(V) when V =:= 5 -> 1;
 inc_shape(V) -> V + 1.
 
-inc_jet(Jets, V) ->
-    NeedReset = V >= length(Jets),
-    if
-        NeedReset -> 1;
-        true -> V + 1
-    end.
+cycle_through_jets(Jets, Idx) when Idx >= length(Jets) -> 1;
+cycle_through_jets(_Jets, Idx) -> Idx + 1.
 
 is_zero(V) when V =:= 0 -> true;
 is_zero(_) -> false.
@@ -99,7 +93,7 @@ play_shape(Funtil, Well, ShapeIdx, {X, Y}, Jets, JetIdx, Stats) ->
     X1 = X + Xmoved,
 
     % down - updates Y / IsLanded
-    {0, Ymoved} = DropOffset = effective_offset(Well, ShapeIdx, {X1, Y}, drop_direction()),
+    {0, Ymoved} = _DropOffset = effective_offset(Well, ShapeIdx, {X1, Y}, drop_direction()),
     Y1 = Y + Ymoved,
 
     % check if landed
@@ -109,17 +103,17 @@ play_shape(Funtil, Well, ShapeIdx, {X, Y}, Jets, JetIdx, Stats) ->
 
     io:format("prev Stats / IsLanded = ~p ~p~n", [Stats, IsLanded]),
 
-    if
-        IsLanded ->
+    case IsLanded of
+        true ->
             % stats
             Stats1 = {CountShapes + 1, CountIterations + 1},
             Well1 = set_shape(Well, ShapeIdx, {X1, Y1}),
             IsFinished = Funtil(Stats1, well_height(Well1)),
-            if
-                IsFinished ->
+            case IsFinished of
+                true ->
                     % end
                     {Well1, Stats1};
-                true ->
+                false ->
                     % next shape
                     play_shape(
                         Funtil,
@@ -127,14 +121,16 @@ play_shape(Funtil, Well, ShapeIdx, {X, Y}, Jets, JetIdx, Stats) ->
                         inc_shape(ShapeIdx),
                         {2, well_height(Well1) + 3},
                         Jets,
-                        inc_jet(Jets, JetIdx),
+                        cycle_through_jets(Jets, JetIdx),
                         Stats1
                     )
             end;
-        true ->
+        false ->
             % continue playing
             Stats1 = {CountShapes, CountIterations + 1},
-            play_shape(Funtil, Well, ShapeIdx, {X1, Y1}, Jets, inc_jet(Jets, JetIdx), Stats1)
+            play_shape(
+                Funtil, Well, ShapeIdx, {X1, Y1}, Jets, cycle_through_jets(Jets, JetIdx), Stats1
+            )
     end.
 
 process_dat(Line) ->
@@ -156,7 +152,9 @@ answer() ->
     % {FinalWell, FinalStats} = play(fun({CountShapes}, Height) -> CountShapes =:= 2022 end, well_new(), Jets), % well height = 3202
     {FinalWell, FinalStats} = play(
         % fun({CountShapes, CountIterations}, Height) -> (CountIterations > 10103) end, well_new(), Jets
-        fun({CountShapes, CountIterations}, Height) -> CountShapes =:= 1010 end, well_new(), Jets
+        fun({CountShapes, _CountIterations}, _Height) -> CountShapes =:= 1010 end,
+        well_new(),
+        Jets
         % fun({CountShapes, CountIterations}, Height) -> (CountShapes rem 5 =:= 0) and (CountIterations rem 10091 =:= 0) end, well_new(), Jets
     ),
     WellHeight = well_height(FinalWell),

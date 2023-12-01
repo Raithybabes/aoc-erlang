@@ -4,12 +4,9 @@
 
 -define(line, [X1, Y1, X2, Y2]).
 
-dir(From, To) ->
-    if
-        To > From -> 1;
-        From > To -> -1;
-        From == To -> 0
-    end.
+dir(From, To) when To > From -> 1;
+dir(From, To) when From > To -> -1;
+dir(_, _) -> 0.
 
 filter_orthogonal_lines(Lines) ->
     lists:filter(fun(?line) -> (X1 == X2) or (Y1 == Y2) end, Lines).

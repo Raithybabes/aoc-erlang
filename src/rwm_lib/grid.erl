@@ -83,13 +83,14 @@ process_ext_times(F, FPostProcess, Grid, Ext, Times) ->
 process_ext_until(F, FUntil, Grid, Ext) ->
     process_ext_until(F, fun process_pass_thru/1, FUntil, Grid, Ext).
 process_ext_until(F, FPostProcess, FUntil, Grid, Ext) ->
+    process_ext_until(F, FPostProcess, FUntil, Grid, Ext, false).
+process_ext_until(F, FPostProcess, FUntil, Grid, Ext, false) ->
     Processed1 = process_ext(F, Grid, Ext),
     Processed2 = FPostProcess(Processed1),
     {NewGrid3, NewExt3, IsFinished} = FUntil(Processed2),
-    if
-        IsFinished -> {NewGrid3, NewExt3};
-        ?else -> process_ext_until(F, FPostProcess, FUntil, NewGrid3, NewExt3)
-    end.
+    process_ext_until(F, FPostProcess, FUntil, NewGrid3, NewExt3, IsFinished);
+process_ext_until(_, _, _, Grid, Ext, true) ->
+    {Grid, Ext}.
 
 check_bounds(X, Y, {W, H, _}) when (X >= 0) and (X < W) and (Y >= 0) and (Y < H) -> {X, Y};
 check_bounds(_, _, _) -> [].

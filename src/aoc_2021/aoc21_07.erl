@@ -6,7 +6,7 @@
 % keep_cheapest(Cheapest, []) ->
 %     Cheapest;
 % keep_cheapest({_, CheapestCost} = Cheapest, [{_, CheckCost} = Check | T]) ->
-%     keep_cheapest(rwm:iif(CheapestCost =< CheckCost, Cheapest, Check), T).
+%     keep_cheapest(?CASE(CheapestCost =< CheckCost, Cheapest, Check), T).
 
 % fac(Num) -> fac(Num, 0).
 % fac(0, Total) -> Total;

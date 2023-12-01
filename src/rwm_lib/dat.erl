@@ -72,17 +72,11 @@ extract_global(V, RX) ->
     Captures.
 
 map_data(Filename, Processor) ->
-    Lines = dat_to_list(Filename),
-    if
-        length(Lines) =:= 1 ->
-            Processor(lists:nth(1, Lines));
-        true ->
-            lists:map(
-                Processor,
-                Lines
-            )
-    end.
+    list_or_single(lists:map(Processor, dat_to_list(Filename))).
 
 dat_to_list(Filename) ->
     {ok, Data} = file:read_file(Filename),
     string:split(Data, "\n", all).
+
+list_or_single(List) when length(List) =:= 1 -> lists:nth(1, List);
+list_or_single(List) -> List.
