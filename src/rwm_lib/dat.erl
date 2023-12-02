@@ -14,7 +14,9 @@
     match/2,
     match_global/2,
     extract/2,
-    extract_global/2
+    extract1/2,
+    extract_global/2,
+    extract1_global/2
 ]).
 
 nop(V) -> V.
@@ -67,9 +69,13 @@ extract(V, RX) ->
     {match, Captures} = re:run(V, RX, [{capture, all_but_first, list}]),
     Captures.
 
+extract1(V, RX) -> lists:nth(1, extract(V, RX)).
+
 extract_global(V, RX) ->
     {match, Captures} = re:run(V, RX, [global, {capture, all_but_first, list}]),
     Captures.
+
+extract1_global(V, RX) -> [lists:nth(1, X) || X <- extract_global(V, RX)].
 
 map_data(Filename, Processor) ->
     list_or_single(lists:map(Processor, dat_to_list(Filename))).

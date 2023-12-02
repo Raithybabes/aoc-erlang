@@ -9,7 +9,8 @@ data(Num, Processor) -> dat:map_data("../src/dat_2023/dat_" ++ Num, Processor).
 
 expected() ->
     [
-        {aoc23_01, {54951,55218}}
+        {aoc23_01, {54951, 55218}},
+        {aoc23_02, {2727, 56580}}
     ].
 
 run() -> aoc_runner:expect(expected()).
