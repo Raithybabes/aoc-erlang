@@ -10,6 +10,14 @@ part_1() ->
     Part1 = R1 * R2 * R3 * R4,
     Part1.
 
+% This takes a while to run on Windows but just a few seconds on Mac
+% It's definitely not good enough and should be optimised...
+% The optimum value is in the middle.
+% The other values are symmetrical to either side.
+% First level optimisation would be to start in middle, and move away from center until no longer achieving the target.
+% Next level would be binary chop to find the 'distance' from the center.
+% Note that even start values have an odd number of results (single mid point),
+% whereas odd start numbers have an equal number of results (pair of mid points)
 part_2() ->
     Part2 = length([
         R
